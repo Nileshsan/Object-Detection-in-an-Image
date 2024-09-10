@@ -2,9 +2,10 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
+from django.conf import settings
 
 
-class UserProfileManager():
+class UserProfileManager(BaseUserManager):
     """Manager for user profile"""
 
     def create_user(self, email, name, password = None):
@@ -18,12 +19,12 @@ class UserProfileManager():
         user.set_password(password)
         user.save(using = self.db)
 
-        return User
+        return user
 
 
-    def create_superuser(self, email, name, passward):
+    def create_superuser(self, email, name, password ):
         """Create and save a new superuser with given details"""
-        user = delf.create_user(email, name, passward)
+        user = self.create_user(email, name, password)
 
 
         user.is_superuser = True
@@ -31,6 +32,9 @@ class UserProfileManager():
         user.save(using = self.db)
 
         return user
+
+    def get_by_natural_key(self, email):
+        return self.get(email = email)
 
 
 class UserProfile(AbstractBaseUser, PermissionsMixin):
@@ -45,6 +49,11 @@ class UserProfile(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS =['name']
+
+
+    def get_by_natural_key(self):
+        return self.email
+
 
     def get_full_name(self):
         """Retrive full name of user"""
